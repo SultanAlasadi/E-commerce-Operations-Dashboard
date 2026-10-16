@@ -1,0 +1,202 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// CHECK constraints cannot be expressed in Prisma; they are added by hand in
+// prisma/migrations/*_init/migration.sql. Emails are stored lowercased.
+
+enum Role {
+  OWNER
+  MANAGER
+  USER
+}
+
+enum Permission {
+  VIEW_DASHBOARD
+  VIEW_SALES
+  ADD_SALES
+  EDIT_SALES
+  DELETE_SALES
+  MANAGE_PLATFORMS
+  MANAGE_TEAM
+}
+
+enum SalesOrigin {
+  MANUAL
+  IMPORT
+}
+
+enum AuditAction {
+  CREATED
+  CORRECTED
+  DELETED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+model Workspace {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  name             String
+  /// ISO 4217 code, e.g. SAR. Changing it after sales exist requires a data migration.
+  currency         String    @db.VarChar(3)
+  /// IANA time zone; business dates are calendar days in this zone.
+  timeZone         String
+  setupCompletedAt DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  members     Member[]
+  invitations Invitation[]
+  platforms   Platform[]
+  dailySales  DailySales[]
+  salesAudits SalesAudit[]
+}
+
+model Member {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  clerkUserId String
+  email       String
+  displayName String
+  role        Role
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  /// Members are never deleted, so audit attribution survives removal.
+  removedAt   DateTime?
+  removedById String?   @db.Uuid
+
+  workspace   Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  removedBy   Member?            @relation("MemberRemovedBy", fields: [removedById], references: [id], onDelete: Restrict)
+  removed     Member[]           @relation("MemberRemovedBy")
+  permissions MemberPermission[]
+
+  invitationsSent   Invitation[] @relation("InvitationInvitedBy")
+  platformsArchived Platform[]   @relation("PlatformArchivedBy")
+  salesCreated      DailySales[] @relation("DailySalesCreatedBy")
+  salesUpdated      DailySales[] @relation("DailySalesUpdatedBy")
+  salesAudits       SalesAudit[]
+
+  @@unique([workspaceId, clerkUserId])
+  /// Exactly one active owner per workspace.
+  @@unique([workspaceId], map: "Member_one_active_owner", where: raw("\"role\" = 'OWNER' AND \"removedAt\" IS NULL"))
+  @@index([clerkUserId])
+}
+
+/// The member's effective granted permissions. Role defaults are written when the
+/// member is created; owners are stored with every permission.
+model MemberPermission {
+  memberId   String     @db.Uuid
+  permission Permission
+  createdAt  DateTime   @default(now())
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@id([memberId, permission])
+}
+
+model Invitation {
+  id                String           @id @default(uuid(7)) @db.Uuid
+  workspaceId       String           @db.Uuid
+  email             String
+  role              Role
+  permissions       Permission[]
+  invitedById       String           @db.Uuid
+  clerkInvitationId String?          @unique
+  status            InvitationStatus @default(PENDING)
+  expiresAt         DateTime
+  acceptedAt        DateTime?
+  revokedAt         DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  invitedBy Member    @relation("InvitationInvitedBy", fields: [invitedById], references: [id], onDelete: Restrict)
+
+  /// At most one pending invitation per email.
+  @@unique([workspaceId, email], map: "Invitation_one_pending_per_email", where: raw("\"status\" = 'PENDING'"))
+  @@index([workspaceId, status])
+}
+
+model Platform {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  workspaceId       String    @db.Uuid
+  name              String
+  provider          String?
+  /// Coverage (expected daily entries) starts on this business date.
+  trackingStartDate DateTime  @db.Date
+  /// Archiving stops new entries and coverage expectations; history stays reportable.
+  archivedAt        DateTime?
+  archivedById      String?   @db.Uuid
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  archivedBy  Member?      @relation("PlatformArchivedBy", fields: [archivedById], references: [id], onDelete: Restrict)
+  dailySales  DailySales[]
+  salesAudits SalesAudit[]
+
+  @@unique([workspaceId, name])
+  /// Target of the composite foreign keys from DailySales and SalesAudit, so a
+  /// row can never point at another workspace's platform.
+  @@unique([workspaceId, id])
+}
+
+/// One manually entered total per platform per business date.
+model DailySales {
+  id           String      @id @default(uuid(7)) @db.Uuid
+  workspaceId  String      @db.Uuid
+  platformId   String      @db.Uuid
+  businessDate DateTime    @db.Date
+  orders       Int
+  /// Customer-paid total after discounts, including shipping and tax, before refunds and fees.
+  amount       Decimal     @db.Decimal(14, 2)
+  origin       SalesOrigin @default(MANUAL)
+  createdById  String      @db.Uuid
+  updatedById  String      @db.Uuid
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  platform  Platform  @relation(fields: [workspaceId, platformId], references: [workspaceId, id], onDelete: Restrict)
+  createdBy Member    @relation("DailySalesCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy Member    @relation("DailySalesUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+
+  @@unique([workspaceId, platformId, businessDate])
+  @@index([workspaceId, businessDate])
+}
+
+/// Append-only history, keyed by platform and business date rather than by record
+/// id so it survives a delete followed by a new entry for the same day.
+model SalesAudit {
+  id            String      @id @default(uuid(7)) @db.Uuid
+  workspaceId   String      @db.Uuid
+  platformId    String      @db.Uuid
+  businessDate  DateTime    @db.Date
+  /// Not a foreign key: the record may since have been deleted.
+  salesRecordId String?     @db.Uuid
+  action        AuditAction
+  actorId       String      @db.Uuid
+  beforeOrders  Int?
+  beforeAmount  Decimal?    @db.Decimal(14, 2)
+  afterOrders   Int?
+  afterAmount   Decimal?    @db.Decimal(14, 2)
+  reason        String?
+  createdAt     DateTime    @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  platform  Platform  @relation(fields: [workspaceId, platformId], references: [workspaceId, id], onDelete: Restrict)
+  actor     Member    @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([workspaceId, platformId, businessDate, createdAt])
+}

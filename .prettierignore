@@ -1,0 +1,7 @@
+node_modules/
+.next/
+generated/
+package-lock.json
+design/
+prisma/migrations/
+next-env.d.ts
