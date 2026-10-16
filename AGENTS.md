@@ -43,3 +43,24 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Database writes go through the services in `lib/server/*`. They return `Result` values (`lib/server/result.ts`) for expected outcomes such as DUPLICATE or STALE, and throw only on real failures. Business dates go through `lib/dates.ts`.
 - Database tests (`*.db.test.ts`) create and delete their own workspace and skip themselves when `NEON_BRANCH` is unset or is `production`.
 - Before considering a change done, run `npm run lint`, `npm run typecheck`, and the relevant tests.
+
+### Protected rules — never cross
+
+These apply to every agent (Claude, Codex, any other) working on a phase. If a rule blocks the work, stop and ask the owner. Never work around it.
+
+1. **Stay in scope.** Change only the files your phase file in `docs/roadmap/` names. If something else looks wrong, list it under "Follow-ups" in the PR; do not fix it.
+2. **No unrequested refactoring.** Do not rename, move, restructure, reformat or "clean up" existing code your phase does not need. Do not change existing function signatures or `Result` error codes; add new functions instead.
+3. **Never edit these files** on a phase branch:
+   - `prisma/schema.prisma` and `prisma/migrations/**`
+   - `PLAN.md`, `AGENTS.md`, `docs/roadmap/**` and `design/**`
+   - `.claude/**`, `.github/**` and `scripts/scope/**`
+4. **Never change the product rules.** These are already enforced in code; keep them exactly as they are:
+   - the business-date, money, AOV and "missing means unknown, never zero" rules above;
+   - the audit row written in the same transaction;
+   - the auth order: Clerk identity, then active membership in Neon, then permission.
+
+   Do not weaken a check to make a test or a build pass.
+5. **No new dependencies** unless your phase file needs them. Add them with `npm install --save-exact` and list them in the PR.
+6. **Format only your own files.** Run Prettier on the files you created or changed, never on the whole repo.
+7. **Never merge, push to `main`, force-push or rewrite history.** Open a PR; the owner merges after review.
+8. **Check your scope before opening the PR:** run `node scripts/scope/check-scope.mjs`. The same check runs on GitHub for every PR, and a PR that fails it will not be merged.
