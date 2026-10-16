@@ -1,52 +1,74 @@
 import Link from "next/link";
 import { SignInButton, SignOutButton, UserButton } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentMember } from "@/lib/auth/membership";
 
 export const metadata = { title: "No access" };
 
-// Plain markup on purpose: Phase 2 restyles this page.
 // This page must never call requireMember(), which redirects here.
+function AccessFrame({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <main className="bg-background flex min-h-screen items-center justify-center px-5 py-12">
+      <Card className="border-border bg-card w-full max-w-xl shadow-none">
+        <CardContent className="space-y-5 p-8 sm:p-10">
+          <p className="text-xl font-bold tracking-tight">
+            Operations Dashboard<span className="text-primary">.</span>
+          </p>
+          <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
+          {children}
+        </CardContent>
+      </Card>
+    </main>
+  );
+}
+
 export default async function NoAccessPage() {
   const current = await getCurrentMember();
 
   if (current.ok) {
     // An active member who opened a page they lack the permission for.
     return (
-      <main className="p-4">
-        <h1>You don&apos;t have access to this page</h1>
-        <p>
+      <AccessFrame title="You don’t have access to this page">
+        <p className="text-muted-foreground text-sm leading-6">
           Your account in {current.value.workspace.name} doesn&apos;t include the permission this
           page needs. Ask the workspace owner if you need it.
         </p>
-        <p>
+        <Button asChild>
           <Link href="/">Go to the home page</Link>
-        </p>
-      </main>
+        </Button>
+      </AccessFrame>
     );
   }
 
   if (current.error === "UNAUTHENTICATED") {
     return (
-      <main className="p-4">
-        <h1>Sign in to continue</h1>
-        <p>You need to sign in before you can open this workspace.</p>
-        <SignInButton />
-      </main>
+      <AccessFrame title="Sign in to continue">
+        <p className="text-muted-foreground text-sm leading-6">
+          You need to sign in before you can open this workspace.
+        </p>
+        <SignInButton>
+          <Button>Sign in</Button>
+        </SignInButton>
+      </AccessFrame>
     );
   }
 
   return (
-    <main className="p-4">
-      <h1>No access to this workspace</h1>
-      <p>
+    <AccessFrame title="No access to this workspace">
+      <p className="text-muted-foreground text-sm leading-6">
         This account isn&apos;t a member of this workspace. Ask the workspace owner to send an
         invitation to your email address, then sign in with that address.
       </p>
-      <p>If you signed in with the wrong account, sign out and try another one.</p>
-      <div className="flex items-center gap-4">
+      <p className="text-muted-foreground text-sm leading-6">
+        If you signed in with the wrong account, sign out and try another one.
+      </p>
+      <div className="flex items-center gap-4 pt-2">
         <UserButton />
-        <SignOutButton />
+        <SignOutButton>
+          <Button variant="outline">Sign out</Button>
+        </SignOutButton>
       </div>
-    </main>
+    </AccessFrame>
   );
 }
