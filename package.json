@@ -18,7 +18,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:status": "prisma migrate status",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "owner:provision": "tsx scripts/provision-owner.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "7.9.14",
