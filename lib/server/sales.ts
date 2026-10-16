@@ -225,11 +225,15 @@ export async function correctDailySales(
   });
 }
 
-/** Deletes a record. The day becomes missing again; the audit history keeps the values. */
+/**
+ * Deletes a record. The day becomes missing again; the audit history keeps the values.
+ * Pass `expectedUpdatedAt` from the record the user saw to reject the delete if
+ * someone else changed it in the meantime.
+ */
 export async function deleteDailySales(
   ctx: SalesContext,
   recordId: string,
-  options: { reason?: string } = {},
+  options: { reason?: string; expectedUpdatedAt?: Date } = {},
   db: PrismaClient = getPrisma(),
 ): Promise<Result<{ id: string }, SalesError>> {
   return db.$transaction(async (tx) => {
@@ -237,8 +241,20 @@ export async function deleteDailySales(
       where: { id: recordId, workspaceId: ctx.workspaceId },
     });
     if (!current) return fail("NOT_FOUND", "This record no longer exists.");
+    if (
+      options.expectedUpdatedAt &&
+      current.updatedAt.getTime() !== options.expectedUpdatedAt.getTime()
+    ) {
+      return fail("STALE", "Someone else changed this record. Reload it and try again.");
+    }
 
-    await tx.dailySales.delete({ where: { id: current.id } });
+    // The conditional delete guards against a concurrent correction.
+    const { count } = await tx.dailySales.deleteMany({
+      where: { id: current.id, updatedAt: current.updatedAt },
+    });
+    if (count === 0) {
+      return fail("STALE", "Someone else changed this record. Reload it and try again.");
+    }
     await tx.salesAudit.create({
       data: {
         workspaceId: ctx.workspaceId,
@@ -268,4 +284,32 @@ export async function getSalesHistory(
     orderBy: { createdAt: "desc" },
     include: { actor: { select: { displayName: true, removedAt: true } } },
   });
+}
+
+/**
+ * Recorded days in an inclusive business-date range, newest first. Days without a
+ * row are unknown, not zero; callers decide which of them count as missing.
+ */
+export async function listDailySales(
+  workspaceId: string,
+  range: { from: BusinessDate; to: BusinessDate; platformId?: string },
+  db: PrismaClient = getPrisma(),
+): Promise<DailySalesRecord[]> {
+  const rows = await db.dailySales.findMany({
+    where: {
+      workspaceId,
+      businessDate: { gte: toDbDate(range.from), lte: toDbDate(range.to) },
+      ...(range.platformId ? { platformId: range.platformId } : {}),
+    },
+    orderBy: [{ businessDate: "desc" }, { platformId: "asc" }],
+    select: {
+      id: true,
+      platformId: true,
+      businessDate: true,
+      orders: true,
+      amount: true,
+      updatedAt: true,
+    },
+  });
+  return rows.map(toRecord);
 }
