@@ -1,0 +1,9 @@
+{
+  "files.watcherExclude": {
+    "**/generated/**": true,
+    "**/.next/**": true
+  },
+  "search.exclude": {
+    "**/generated/**": true
+  }
+}

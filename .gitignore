@@ -5,3 +5,9 @@ build/
 *.tsbuildinfo
 .env*
 !.env.example
+.neon
+generated/prisma/
+next-env.d.ts
+/test-results/
+/playwright-report/
+/coverage/
