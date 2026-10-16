@@ -13,7 +13,7 @@ function AccessFrame({ title, children }: { title: string; children: React.React
       <Card className="border-border bg-card w-full max-w-xl shadow-none">
         <CardContent className="space-y-5 p-8 sm:p-10">
           <p className="text-xl font-bold tracking-tight">
-            ledgerline<span className="text-primary">.</span>
+            Operations Dashboard<span className="text-primary">.</span>
           </p>
           <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
           {children}

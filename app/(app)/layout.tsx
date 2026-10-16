@@ -12,7 +12,7 @@ export default async function AppLayout({ children }: Readonly<{ children: React
       <aside className="hidden min-h-screen w-60 shrink-0 flex-col border-r bg-[#151222] px-4 py-8 md:flex">
         <div className="px-2">
           <p className="text-2xl font-bold tracking-tight">
-            ledgerline<span className="text-primary">.</span>
+            Operations Dashboard<span className="text-primary">.</span>
           </p>
           <p className="text-muted-foreground mt-2 truncate text-[11px] font-semibold tracking-[0.12em] uppercase">
             {ctx.workspace.name}
@@ -35,7 +35,7 @@ export default async function AppLayout({ children }: Readonly<{ children: React
         <header className="flex items-center justify-between border-b px-5 py-5 md:hidden">
           <div>
             <p className="text-2xl font-bold tracking-tight">
-              ledgerline<span className="text-primary">.</span>
+              Operations Dashboard<span className="text-primary">.</span>
             </p>
             <p className="text-muted-foreground max-w-56 truncate text-xs">{ctx.workspace.name}</p>
           </div>
