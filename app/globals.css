@@ -1,1 +1,74 @@
 @import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --background: #171425;
+  --foreground: #f7f4ff;
+  --card: #211d34;
+  --card-foreground: #f7f4ff;
+  --popover: #211d34;
+  --popover-foreground: #f7f4ff;
+  --primary: #8555ec;
+  --primary-foreground: #ffffff;
+  --secondary: #302944;
+  --secondary-foreground: #e5d9ff;
+  --muted: #302944;
+  --muted-foreground: #aaa0c3;
+  --accent: #39295e;
+  --accent-foreground: #d4baff;
+  --destructive: #9c416f;
+  --destructive-foreground: #ffffff;
+  --border: #403655;
+  --input: #514467;
+  --ring: #aa83fa;
+  --chart-1: #8555ec;
+  --chart-2: #ebaaa4;
+  --positive: #71e1dd;
+  --incomplete: #ffd08a;
+  --radius: 0.875rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-positive: var(--positive);
+  --color-incomplete: var(--incomplete);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
+}
+
+* {
+  border-color: var(--border);
+}
+html {
+  background: var(--background);
+}
+body {
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Inter, Arial, Helvetica, sans-serif;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
