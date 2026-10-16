@@ -1,0 +1,78 @@
+{
+  "$comment": "Which files each phase branch may change. Read by check-scope.mjs. Patterns: ** matches any path, * matches within one folder. See AGENTS.md > Protected rules and docs/roadmap/.",
+  "protected": [
+    "prisma/schema.prisma",
+    "prisma/migrations/**",
+    "PLAN.md",
+    "AGENTS.md",
+    "docs/roadmap/**",
+    "design/**",
+    ".claude/**",
+    ".github/**",
+    "scripts/scope/**"
+  ],
+  "alwaysAllowed": ["package.json", "package-lock.json"],
+  "phases": {
+    "feature/authorization": [
+      "lib/auth/**",
+      "lib/server/membership.ts",
+      "lib/server/membership.db.test.ts",
+      "app/no-access/**",
+      "app/page.tsx"
+    ],
+    "feature/app-shell": [
+      "app/(app)/**",
+      "app/layout.tsx",
+      "app/page.tsx",
+      "app/globals.css",
+      "app/no-access/**",
+      "components/**",
+      "components.json",
+      "lib/utils.ts",
+      "lib/auth/membership.ts"
+    ],
+    "feature/settings-platforms": [
+      "app/(app)/settings/**",
+      "app/(app)/platforms/**",
+      "components/**"
+    ],
+    "feature/sales": [
+      "app/(app)/sales/**",
+      "lib/server/sales.ts",
+      "lib/server/sales*.test.ts",
+      "components/**"
+    ],
+    "feature/team": [
+      "app/(app)/team/**",
+      "app/api/webhooks/**",
+      "app/no-access/**",
+      "lib/server/team.ts",
+      "lib/server/team*.test.ts",
+      "lib/permissions.ts",
+      "lib/permissions.test.ts",
+      "lib/validation/team.ts",
+      "lib/validation/team.test.ts",
+      ".env.example",
+      "components/**"
+    ],
+    "feature/dashboard": [
+      "app/(app)/page.tsx",
+      "app/(app)/_dashboard/**",
+      "lib/server/reports.ts",
+      "lib/server/reports*.test.ts",
+      "lib/dates.ts",
+      "lib/dates.test.ts",
+      "components/**"
+    ],
+    "release/v1": [
+      "e2e/**",
+      "playwright.config.ts",
+      "docs/runbooks/**",
+      "instrumentation.ts",
+      "instrumentation-client.ts",
+      "sentry.*.config.ts",
+      "next.config.ts",
+      ".env.example"
+    ]
+  }
+}

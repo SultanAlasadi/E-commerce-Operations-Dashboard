@@ -1,0 +1,25 @@
+name: scope-check
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  scope-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check changed files against the phase scope
+        env:
+          SCOPE_BRANCH: ${{ github.head_ref }}
+          SCOPE_BASE: ${{ github.event.pull_request.base.sha }}
+        run: node scripts/scope/check-scope.mjs

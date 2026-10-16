@@ -25,6 +25,8 @@ This folder splits the v1 MVP into phases that separate agents (Claude chats, Co
 
 ## Rules for every agent
 
+The hard limits are in `AGENTS.md` under "Protected rules — never cross". The rules below add the working setup. Before opening a PR, run `node scripts/scope/check-scope.mjs`; GitHub runs the same check on every PR.
+
 1. **Stay in your phase.** Build only what your phase file lists. Write down anything else you notice under "Follow-ups" in your PR.
 2. **Use your own folder.** Never share a working folder with another agent. Create a git worktree from an up-to-date `main`:
    ```powershell

@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(/prisma/schema.prisma)",
+      "Edit(/prisma/migrations/**)",
+      "Edit(/PLAN.md)",
+      "Edit(/AGENTS.md)",
+      "Edit(/docs/roadmap/**)",
+      "Edit(/design/**)",
+      "Edit(/.claude/settings.json)",
+      "Edit(/.github/**)",
+      "Edit(/scripts/scope/**)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push origin main:*)",
+      "Bash(git push origin HEAD:main:*)"
+    ],
+    "ask": [
+      "Bash(npm run db:migrate:*)",
+      "Bash(npm run db:deploy:*)",
+      "Bash(npm run db:seed:*)",
+      "Bash(npm run owner:provision:*)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(npx prisma db push:*)"
+    ]
+  }
+}
