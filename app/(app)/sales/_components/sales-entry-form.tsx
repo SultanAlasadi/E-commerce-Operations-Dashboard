@@ -3,11 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, CircleDollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { BusinessDate } from "@/lib/dates";
 import { type DailySalesInput, dailySalesInputSchema } from "@/lib/validation/sales";
 import { addDailySales } from "../actions";
@@ -147,21 +154,35 @@ export function SalesEntryForm({
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
             <div className="grid gap-6 sm:grid-cols-2">
               <Field id="platformId" label="Platform" error={errors.platformId?.message}>
-                <select
-                  id="platformId"
-                  className={controlClass}
-                  {...describedBy("platformId", errors.platformId?.message)}
-                  {...register("platformId")}
-                >
-                  <option value="" disabled>
-                    Choose a platform
-                  </option>
-                  {platforms.map((platform) => (
-                    <option key={platform.id} value={platform.id}>
-                      {platform.name}
-                    </option>
-                  ))}
-                </select>
+                <Controller
+                  control={control}
+                  name="platformId"
+                  render={({ field }) => (
+                    <Select
+                      name={field.name}
+                      value={field.value || undefined}
+                      onValueChange={field.onChange}
+                      onOpenChange={(open) => {
+                        if (!open) field.onBlur();
+                      }}
+                    >
+                      <SelectTrigger
+                        ref={field.ref}
+                        id="platformId"
+                        {...describedBy("platformId", errors.platformId?.message)}
+                      >
+                        <SelectValue placeholder="Choose a platform" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {platforms.map((platform) => (
+                          <SelectItem key={platform.id} value={platform.id}>
+                            {platform.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </Field>
 
               <Field
@@ -260,10 +281,7 @@ export function SalesEntryForm({
             </div>
 
             {formError ? (
-              <p
-                role="alert"
-                className="bg-destructive/20 rounded-xl px-4 py-3 text-sm text-[#f08cbd]"
-              >
+              <p role="alert" className="bg-danger-soft text-danger rounded-xl px-4 py-3 text-sm">
                 {formError}
               </p>
             ) : null}

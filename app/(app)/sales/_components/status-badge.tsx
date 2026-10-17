@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 
 const tones = {
-  positive: "bg-positive/15 text-positive",
-  primary: "bg-primary/25 text-accent-foreground",
-  danger: "bg-destructive/25 text-[#f08cbd]",
-  warning: "bg-incomplete/15 text-incomplete",
+  positive: "bg-positive-soft text-positive",
+  primary: "bg-accent text-accent-foreground",
+  danger: "bg-danger-soft text-danger",
+  warning: "bg-incomplete-soft text-incomplete",
   muted: "bg-secondary text-muted-foreground",
 } as const;
 
@@ -20,7 +20,7 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold whitespace-nowrap",
+        "inline-flex items-center gap-2 px-3 py-1 text-sm font-semibold whitespace-nowrap",
         tones[tone],
         className,
       )}

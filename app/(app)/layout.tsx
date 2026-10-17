@@ -9,7 +9,7 @@ export default async function AppLayout({ children }: Readonly<{ children: React
 
   return (
     <div className="bg-background min-h-screen md:flex">
-      <aside className="hidden min-h-screen w-60 shrink-0 flex-col border-r bg-[#151222] px-4 py-8 md:flex">
+      <aside className="bg-secondary hidden min-h-screen w-60 shrink-0 flex-col border-r px-4 py-8 md:flex">
         <div className="px-2">
           <p className="text-2xl font-bold tracking-tight">
             Operations Dashboard<span className="text-primary">.</span>

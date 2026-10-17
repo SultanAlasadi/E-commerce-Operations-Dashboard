@@ -156,7 +156,7 @@ export default async function SalesHistoryPage({
 
               <ol className="space-y-3 md:hidden">
                 {entries.map((entry) => (
-                  <li key={entry.id} className="bg-background/40 space-y-3 rounded-2xl border p-4">
+                  <li key={entry.id} className="bg-card space-y-3 rounded-2xl border p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="font-semibold">{entry.who}</p>

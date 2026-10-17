@@ -162,7 +162,7 @@ export function PlatformsView({ platforms, today }: { platforms: Platform[]; tod
                   {displayDate(platform.trackingStartDate)}
                 </span>
                 <Badge
-                  className={`w-fit rounded-full ${platform.archived ? "bg-accent text-accent-foreground" : "bg-[#174043] text-[#71e1dd]"}`}
+                  className={`w-fit ${platform.archived ? "bg-accent text-accent-foreground" : "bg-positive-soft text-positive"}`}
                 >
                   {platform.archived ? "Archived" : "Active"}
                 </Badge>
@@ -210,9 +210,7 @@ export function PlatformsView({ platforms, today }: { platforms: Platform[]; tod
                 aria-invalid={Boolean(form.formState.errors.name)}
               />
               {form.formState.errors.name && (
-                <p className="text-destructive-foreground text-sm">
-                  {form.formState.errors.name.message}
-                </p>
+                <p className="text-danger text-sm">{form.formState.errors.name.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -227,9 +225,7 @@ export function PlatformsView({ platforms, today }: { platforms: Platform[]; tod
                 placeholder="e.g. Shopify"
               />
               {form.formState.errors.provider && (
-                <p className="text-destructive-foreground text-sm">
-                  {form.formState.errors.provider.message}
-                </p>
+                <p className="text-danger text-sm">{form.formState.errors.provider.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -244,14 +240,14 @@ export function PlatformsView({ platforms, today }: { platforms: Platform[]; tod
                 aria-invalid={Boolean(form.formState.errors.trackingStartDate)}
               />
               {form.formState.errors.trackingStartDate && (
-                <p className="text-destructive-foreground text-sm">
+                <p className="text-danger text-sm">
                   {form.formState.errors.trackingStartDate.message}
                 </p>
               )}
               <p className="text-muted-foreground text-xs">Coverage starts on this calendar day.</p>
             </div>
             {actionError && (
-              <p role="alert" className="text-destructive-foreground text-sm">
+              <p role="alert" className="text-danger text-sm">
                 {actionError}
               </p>
             )}
@@ -285,7 +281,7 @@ export function PlatformsView({ platforms, today }: { platforms: Platform[]; tod
             </SheetDescription>
           </SheetHeader>
           {actionError && (
-            <p role="alert" className="text-destructive-foreground mb-4 text-sm">
+            <p role="alert" className="text-danger mb-4 text-sm">
               {actionError}
             </p>
           )}

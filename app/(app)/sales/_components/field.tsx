@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 /** Native form controls styled to the design tokens (design/04, design/14). */
 export const controlClass =
-  "bg-secondary/60 border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-ring h-12 w-full rounded-xl border px-4 text-base outline-none focus-visible:ring-2 disabled:opacity-60 aria-invalid:border-[#d0709f] sm:text-sm [color-scheme:dark]";
+  "bg-secondary/60 border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-ring h-12 w-full rounded-xl border px-4 text-base outline-none focus-visible:ring-2 disabled:opacity-60 aria-invalid:border-danger sm:text-sm";
 
 export function Field({
   id,
@@ -26,7 +26,7 @@ export function Field({
       </label>
       {children}
       {error ? (
-        <p id={`${id}-error`} role="alert" className="text-xs text-[#f08cbd]">
+        <p id={`${id}-error`} role="alert" className="text-danger text-xs">
           {error}
         </p>
       ) : hint ? (

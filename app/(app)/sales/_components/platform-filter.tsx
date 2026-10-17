@@ -3,6 +3,16 @@
 import { useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Filter } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+/** Radix Select reserves "" for "no value", so "All platforms" uses its own key. */
+const ALL = "all";
 
 /** Platform filter for the list, calendar and totals. Kept in the URL. */
 export function PlatformFilter({
@@ -18,30 +28,34 @@ export function PlatformFilter({
 
   function onChange(platform: string) {
     const query = new URLSearchParams(searchParams.toString());
-    if (platform) query.set("platform", platform);
+    if (platform && platform !== ALL) query.set("platform", platform);
     else query.delete("platform");
     startTransition(() => router.push(`/sales?${query.toString()}`));
   }
 
   return (
-    <label className="bg-secondary/60 border-input relative flex h-11 w-full items-center gap-2 rounded-xl border pr-3 pl-4 text-sm sm:w-auto">
-      <Filter aria-hidden="true" className="text-muted-foreground size-4 shrink-0" />
-      <span className="text-muted-foreground shrink-0">Platform</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        disabled={pending}
+    <Select value={value || ALL} onValueChange={onChange} disabled={pending}>
+      <SelectTrigger
         aria-label="Platform"
-        className="min-w-0 flex-1 bg-transparent py-2 font-medium [color-scheme:dark] outline-none sm:flex-none"
+        className="h-11 w-full gap-2 pr-3 pl-4 text-sm sm:w-auto sm:min-w-56"
       >
-        <option value="">All platforms</option>
+        <span className="flex min-w-0 items-center gap-2">
+          <Filter aria-hidden="true" className="text-muted-foreground size-4 shrink-0" />
+          <span className="text-muted-foreground shrink-0">Platform</span>
+          <span className="text-foreground truncate font-medium">
+            <SelectValue />
+          </span>
+        </span>
+      </SelectTrigger>
+      <SelectContent align="end">
+        <SelectItem value={ALL}>All platforms</SelectItem>
         {platforms.map((platform) => (
-          <option key={platform.id} value={platform.id}>
+          <SelectItem key={platform.id} value={platform.id}>
             {platform.name}
             {platform.archived ? " (archived)" : ""}
-          </option>
+          </SelectItem>
         ))}
-      </select>
-    </label>
+      </SelectContent>
+    </Select>
   );
 }

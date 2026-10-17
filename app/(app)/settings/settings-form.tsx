@@ -1,18 +1,40 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
 import { workspaceSettingsSchema } from "@/lib/validation/workspace";
 import { saveWorkspaceSettings } from "./actions";
 
 type Values = z.input<typeof workspaceSettingsSchema>;
 const inputClass =
   "bg-secondary/50 border-input focus-visible:ring-ring h-11 w-full rounded-lg border px-3 text-sm outline-none focus-visible:ring-2";
+/** Same height and corners as the text input above it. */
+const comboboxClass = "bg-secondary/50 h-11 rounded-lg px-3 text-sm sm:text-sm";
+
+/** "SAR — Saudi Riyal"; the search also matches the currency name. */
+function currencyOptions(): ComboboxOption[] {
+  const names = new Intl.DisplayNames(["en"], { type: "currency" });
+  return Intl.supportedValuesOf("currency").map((code) => {
+    const name = names.of(code);
+    return { value: code, label: name && name !== code ? `${code} — ${name}` : code };
+  });
+}
+
+/** "Asia/Riyadh" shown as "Asia / Riyadh"; keeps a saved zone the runtime does not list. */
+function timeZoneOptions(current: string): ComboboxOption[] {
+  const zones = Intl.supportedValuesOf("timeZone");
+  if (current && !zones.includes(current)) zones.unshift(current);
+  return zones.map((zone) => ({
+    value: zone,
+    label: zone.replace(/_/g, " ").replace(/\//g, " / "),
+  }));
+}
 
 export function SettingsForm({
   initial,
@@ -27,8 +49,8 @@ export function SettingsForm({
     resolver: zodResolver(workspaceSettingsSchema),
     defaultValues: initial,
   });
-  const currencies = Intl.supportedValuesOf("currency");
-  const timeZones = Intl.supportedValuesOf("timeZone");
+  const currencies = useMemo(() => currencyOptions(), []);
+  const timeZones = useMemo(() => timeZoneOptions(initial.timeZone), [initial.timeZone]);
 
   async function onSubmit(values: Values) {
     setMessage("");
@@ -68,34 +90,36 @@ export function SettingsForm({
                 aria-invalid={Boolean(form.formState.errors.name)}
               />
               {form.formState.errors.name && (
-                <p className="text-destructive-foreground text-sm">
-                  {form.formState.errors.name.message}
-                </p>
+                <p className="text-danger text-sm">{form.formState.errors.name.message}</p>
               )}
             </div>
             <div className="space-y-2">
               <label htmlFor="workspace-currency" className="text-sm font-medium">
                 Reporting currency
               </label>
-              <select
-                id="workspace-currency"
-                className={inputClass}
-                {...form.register("currency")}
-                aria-invalid={Boolean(form.formState.errors.currency || currencyError)}
-              >
-                {currencies.map((code) => (
-                  <option key={code} value={code}>
-                    {code}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <Combobox
+                    ref={field.ref}
+                    id="workspace-currency"
+                    className={comboboxClass}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={currencies}
+                    searchPlaceholder="Search currency, e.g. SAR or riyal"
+                    emptyText="No currency matches."
+                    aria-invalid={Boolean(form.formState.errors.currency || currencyError)}
+                  />
+                )}
+              />
               {form.formState.errors.currency && (
-                <p className="text-destructive-foreground text-sm">
-                  {form.formState.errors.currency.message}
-                </p>
+                <p className="text-danger text-sm">{form.formState.errors.currency.message}</p>
               )}
               {currencyError && (
-                <p role="alert" className="text-sm text-[#ffd08a]">
+                <p role="alert" className="text-incomplete text-sm">
                   {currencyError}
                 </p>
               )}
@@ -107,25 +131,26 @@ export function SettingsForm({
               <label htmlFor="workspace-time-zone" className="text-sm font-medium">
                 IANA time zone
               </label>
-              <select
-                id="workspace-time-zone"
-                className={inputClass}
-                {...form.register("timeZone")}
-                aria-invalid={Boolean(form.formState.errors.timeZone)}
-              >
-                {!timeZones.includes(initial.timeZone) && (
-                  <option value={initial.timeZone}>{initial.timeZone}</option>
+              <Controller
+                control={form.control}
+                name="timeZone"
+                render={({ field }) => (
+                  <Combobox
+                    ref={field.ref}
+                    id="workspace-time-zone"
+                    className={comboboxClass}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={timeZones}
+                    searchPlaceholder="Search time zone, e.g. Riyadh"
+                    emptyText="No time zone matches."
+                    aria-invalid={Boolean(form.formState.errors.timeZone)}
+                  />
                 )}
-                {timeZones.map((zone) => (
-                  <option key={zone} value={zone}>
-                    {zone}
-                  </option>
-                ))}
-              </select>
+              />
               {form.formState.errors.timeZone && (
-                <p className="text-destructive-foreground text-sm">
-                  {form.formState.errors.timeZone.message}
-                </p>
+                <p className="text-danger text-sm">{form.formState.errors.timeZone.message}</p>
               )}
               <p className="text-muted-foreground text-xs">Business dates use this time zone.</p>
             </div>

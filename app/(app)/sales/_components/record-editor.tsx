@@ -260,7 +260,7 @@ export function RecordEditor({
                 The day becomes missing. Audit history retains the deletion.
               </p>
               {deleteProblem ? (
-                <p role="alert" className="text-sm text-[#f08cbd]">
+                <p role="alert" className="text-danger text-sm">
                   {deleteProblem.kind === "connection"
                     ? "Could not delete. Check the connection and retry. The record has not changed."
                     : deleteProblem.message}

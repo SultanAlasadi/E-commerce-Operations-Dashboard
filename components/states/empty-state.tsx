@@ -13,7 +13,7 @@ export function EmptyState({
   return (
     <Card className="border-border bg-card min-h-64 shadow-none">
       <CardContent className="flex h-full flex-col items-start gap-4 p-7">
-        <Badge className="bg-accent text-accent-foreground hover:bg-accent rounded-full px-3 py-1">
+        <Badge className="bg-accent text-accent-foreground hover:bg-accent px-3 py-1">
           {title}
         </Badge>
         <p className="text-muted-foreground max-w-lg text-sm">{description}</p>

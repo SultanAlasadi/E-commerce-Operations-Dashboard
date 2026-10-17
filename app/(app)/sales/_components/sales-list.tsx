@@ -88,7 +88,7 @@ export function SalesList({
           <li key={record.id}>
             <Link
               href={recordHref(record.platformId, record.businessDate)}
-              className="bg-background/40 hover:border-ring block rounded-2xl border p-5 transition-colors"
+              className="bg-card hover:border-ring block rounded-2xl border p-5 transition-colors"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
